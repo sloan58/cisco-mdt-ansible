@@ -1,0 +1,43 @@
+- hosts: routers
+  connection: ansible.netcommon.network_cli
+
+  tasks:
+    - name: Gather current telemetry subscriptions
+      cisco.ios.ios_command:
+        commands: show run | i telemetry ietf subscription
+      register: pre_telemetry_items
+
+    - set_fact:
+        pre_telemetry_items: "{{ pre_telemetry_items.stdout[0].splitlines() }}"
+
+    - name: "Generate list of desired telemetry configurations"
+      set_fact:
+        post_telemetry_items: "{{ post_telemetry_items + ['telemetry ietf subscription %d'|format(loop_index + 1)] }}"
+      loop: "{{ telemetry_subscriptions }}"
+      loop_control:
+        index_var: loop_index
+      vars:
+        post_telemetry_items: []
+
+    - name: Apply desired telemetry configurations
+      cisco.ios.ios_config:
+        lines:
+          - encoding encode-kvgpb
+          - filter xpath {{ item }}
+          - source-address {{ inventory_hostname }}
+          - stream yang-push
+          - update-policy periodic 500
+          - receiver ip address {{ receiver_ip }} {{ receiver_port }} protocol grpc-tcp
+        parents: telemetry ietf subscription {{ loop_index + 1 }}
+        save_when: changed
+      loop: "{{ telemetry_subscriptions }}"
+      loop_control:
+        index_var: loop_index
+
+    - name: Remove stale telemetry configurations
+      cisco.ios.ios_config:
+        lines:
+          - no {{ item }}
+        save_when: changed
+      when: item not in post_telemetry_items
+      loop: "{{ pre_telemetry_items }}"

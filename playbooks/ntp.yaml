@@ -1,0 +1,11 @@
+- hosts: routers
+  connection: ansible.netcommon.network_cli
+
+  tasks:
+    - name: Configure NTP
+      cisco.ios.ios_config:
+        lines:
+          - ip name-server 8.8.8.8
+          - clock timezone EST -4
+          - ntp server pool.ntp.org
+        save_when: changed

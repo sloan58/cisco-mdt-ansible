@@ -1,0 +1,10 @@
+[routers]
+172.16.0.1
+172.16.0.2
+
+[all:vars]
+ansible_network_os=cisco.ios.ios
+ansible_become=yes
+ansible_user=admin
+ansible_become_method=enable
+ansible_ssh_pass='password'

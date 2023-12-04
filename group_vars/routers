@@ -1,0 +1,10 @@
+---
+receiver_ip: 192.168.1.5
+receiver_port: 57000
+telemetry_subscriptions:
+  - /process-cpu-ios-xe-oper:cpu-usage/cpu-utilization/five-seconds
+  - /interfaces/interface[name=\"GigabitEthernet1\"]/statistics
+  - /memory-ios-xe-oper:memory-statistics/memory-statistic/free-memory
+  - /memory-ios-xe-oper:memory-statistics/memory-statistic/used-memory
+  - /ospf-oper-data/ospf-state
+  - /dhcp-oper-data
